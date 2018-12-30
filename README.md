@@ -25,3 +25,9 @@ Once you have heroku installed and are logged in to the CLI application you can 
 ```
 heroku create <app_name>
 ```
+
+Once created, deploying is as simple as running
+
+```
+git push heroku master
+```
