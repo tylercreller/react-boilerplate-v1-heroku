@@ -1,9 +1,15 @@
 const path = require('path');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const CompressionPlugin = require('compression-webpack-plugin');
 
 module.exports = env => {
 	const isProduction = env === 'production';
-	const CSSExtract = new ExtractTextPlugin('styles.css');
+	const MiniCssExtract = new MiniCssExtractPlugin({ filename: 'styles.css' });
+	const TextCompression = new CompressionPlugin({ test: /\.js$/, deleteOriginalAssets: true });
+	const plugins = [MiniCssExtract];
+	if (isProduction) {
+		plugins.push(TextCompression);
+	}
 
 	return {
 		entry: './src/app.js',
@@ -20,27 +26,32 @@ module.exports = env => {
 				},
 				{
 					test: /\.s?css$/,
-					use: CSSExtract.extract({
-						use: [
-							{
-								loader: 'css-loader',
-								options: {
-									sourceMap: true
-								}
-							},
-							{
-								loader: 'sass-loader',
-								options: {
-									sourceMap: true
-								}
+					use: [
+						{
+							loader: MiniCssExtractPlugin.loader,
+							options: {
+								sourceMap: true
 							}
-						]
-					})
-				}
+						},
+						{
+							loader: 'css-loader',
+							options: {
+								sourceMap: true
+							}
+						},
+						{
+							loader: 'sass-loader',
+							options: {
+								sourceMap: true
+							}
+						}
+					]
+				},
 			]
 		},
-		plugins: [CSSExtract],
-		devtool: isProduction ? 'source-map' : 'inline-source-map',
+		mode: isProduction ? 'production' : 'development',
+		plugins: plugins,
+		devtool: isProduction ? false : 'inline-source-map',
 		devServer: {
 			contentBase: path.join(__dirname, 'public'),
 			historyApiFallback: true,
